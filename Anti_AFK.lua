@@ -169,7 +169,6 @@ local function toggleGui()
         tween:Play()
     else
         lastPosition = ca.Position  -- Speichere die aktuelle Position
-        print(lastPosition)
         local tween = TweenService:Create(ca, TweenInfo.new(0.5), {Position = UDim2.new(0, centerX, -1, centerY)})
         tween:Play()
     end
