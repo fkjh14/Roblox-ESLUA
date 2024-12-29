@@ -1,2 +1,2 @@
 # Roblox-SLUA
-HI im new don't juge pls
+HI im new don't juge
