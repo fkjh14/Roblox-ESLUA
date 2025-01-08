@@ -80,15 +80,6 @@ function GuiLibrary:CreateMainFrame(parent, size, position)
         parent:Destroy()
     end)
 
-    -- Sichtbarkeit umschalten mit Taste (z. B. F1-Taste)
-    local UIS = game:GetService("UserInputService")
-    UIS.InputBegan:Connect(function(input, processed)
-        if not processed and input.KeyCode == Enum.KeyCode.F1 then
-            isVisible = not isVisible
-            mainFrame.Visible = isVisible
-        end
-    end)
-    
     -- Resize Funktion hinzufügen
     local resizeHandle = Instance.new("Frame")
     resizeHandle.Name = "ResizeHandle"
