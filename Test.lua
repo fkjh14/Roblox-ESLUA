@@ -59,6 +59,65 @@ function GuiLibrary:CreateMainFrame(parent, size, position)
     shadow.ZIndex = 0
     shadow.Parent = mainFrame
 
+    -- Close Button erstellen
+    local closeButton = Instance.new("TextButton")
+    closeButton.Name = "CloseButton"
+    closeButton.Size = UDim2.new(0, 30, 0, 30)
+    closeButton.Position = UDim2.new(1, -40, 0, 10)
+    closeButton.BackgroundTransparency = 1
+    closeButton.Font = Enum.Font.SourceSans
+    closeButton.TextSize = 18
+    closeButton.Text = "❌"
+    closeButton.Parent = mainFrame
+
+    closeButton.MouseButton1Click:Connect(function()
+        getgenv().ATG_LOADED = false
+        for _, player in pairs(game:GetService("Players"):GetPlayers()) do
+            if player.Character and player.Character:FindFirstChild("ESP_Highlight") then
+                player.Character:FindFirstChild("ESP_Highlight"):Destroy()
+            end
+        end
+        parent:Destroy()
+    end)
+
+    -- Resize Funktion hinzufügen
+    local resizeHandle = Instance.new("Frame")
+    resizeHandle.Name = "ResizeHandle"
+    resizeHandle.Size = UDim2.new(0, 20, 0, 20)
+    resizeHandle.Position = UDim2.new(1, -20, 1, -20)
+    resizeHandle.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+    resizeHandle.BorderSizePixel = 0
+    resizeHandle.Parent = mainFrame
+    resizeHandle.Active = true
+
+    resizeHandle.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            mainFrame.Draggable = false
+            local startPos = input.Position
+            local startSize = mainFrame.Size
+
+            local moveConnection
+            local releaseConnection
+
+            moveConnection = game:GetService("UserInputService").InputChanged:Connect(function(moveInput)
+                if moveInput.UserInputType == Enum.UserInputType.MouseMovement then
+                    local delta = moveInput.Position - startPos
+                    local newWidth = math.max(200, startSize.X.Offset + delta.X)
+                    local newHeight = math.max(200, startSize.Y.Offset + delta.Y)
+                    mainFrame.Size = UDim2.new(0, newWidth, 0, newHeight)
+                end
+            end)
+
+            releaseConnection = input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    moveConnection:Disconnect()
+                    releaseConnection:Disconnect()
+                    mainFrame.Draggable = true
+                end
+            end)
+        end
+    end)
+
     return mainFrame
 end
 
