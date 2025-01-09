@@ -51,21 +51,6 @@ function GuiLibrary:CreateMainFrame(parent, size, position)
     return mainFrame
 end
 
--- Funktion zum Hinzufügen eines Schatteneffekts
-function GuiLibrary:AddShadow(parent)
-    local shadow = Instance.new("Frame")
-    shadow.Name = "Shadow"
-    shadow.Size = parent.Size + UDim2.new(0, 20, 0, 20)
-    shadow.Position = parent.Position - UDim2.new(0, 10, 0, 10)
-    shadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    shadow.BackgroundTransparency = 0.5
-    shadow.BorderSizePixel = 0
-    shadow.ZIndex = parent.ZIndex - 1
-    shadow.Parent = parent.Parent
-
-    return shadow
-end
-
 -- Funktion zum Erstellen eines Tab Containers
 function GuiLibrary:CreateTabContainer(parent)
     local tabContainer = Instance.new("Frame")
