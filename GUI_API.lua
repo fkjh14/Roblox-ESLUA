@@ -47,7 +47,7 @@ function GUI.new(title)
     self.MainFrame.Name = "MainFrame"
     self.MainFrame.Size = UDim2.new(0, Config.DefaultSizes.FrameWidth, 0, Config.DefaultSizes.FrameHeight)
     self.MainFrame.Position = UDim2.new(0, 150, 0.5, -Config.DefaultSizes.FrameHeight / 2)
-	self.MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+	self.MainFrame.AnchorPoint = Vector2.new(1, 0)
     self.MainFrame.BackgroundColor3 = Config.Colors.Background
     self.MainFrame.BorderSizePixel = 0
     self.MainFrame.Active = false
@@ -59,6 +59,7 @@ function GUI.new(title)
     self.TabContainer.Name = "TabContainer"
     self.TabContainer.Size = UDim2.new(0, 150, 1, -Config.DefaultSizes.DragBarHeight)
     self.TabContainer.Position = UDim2.new(0, 0, 0, Config.DefaultSizes.DragBarHeight)
+	self.TabContainer.AnchorPoint = Vector2.new(1, 0)
     self.TabContainer.BackgroundColor3 = Config.Colors.ButtonBackground
     self.TabContainer.BorderSizePixel = 0
     self.TabContainer.Parent = self.MainFrame
@@ -70,6 +71,7 @@ function GUI.new(title)
     self.ContentContainer.Name = "ContentContainer"
     self.ContentContainer.Size = UDim2.new(1, -150, 1, -Config.DefaultSizes.DragBarHeight)
     self.ContentContainer.Position = UDim2.new(0, 150, 0, Config.DefaultSizes.DragBarHeight)
+	self.ContentContainer.AnchorPoint = Vector2.new(1, 0)
     self.ContentContainer.BackgroundColor3 = Config.Colors.Background
     self.ContentContainer.BorderSizePixel = 0
     self.ContentContainer.Parent = self.MainFrame
