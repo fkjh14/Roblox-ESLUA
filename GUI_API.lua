@@ -38,46 +38,52 @@ end
 function GUI.new(title)
     local self = setmetatable({}, GUI)
 
-    self.ScreenGui = Instance.new("ScreenGui")
+    self.ScreenGui = Instance.new("ScreenGui", CoreGui)
     self.ScreenGui.Name = "ASSLUA_GUI"
     self.ScreenGui.ResetOnSpawn = false
-    self.ScreenGui.Parent = CoreGui
+    self.ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-    self.MainFrame = Instance.new("Frame")
+    -- Dein gewünschtes MainFrame-Layout
+    self.MainFrame = Instance.new("Frame", self.ScreenGui)
     self.MainFrame.Name = "MainFrame"
     self.MainFrame.Size = UDim2.new(0, Config.DefaultSizes.FrameWidth, 0, Config.DefaultSizes.FrameHeight)
     self.MainFrame.Position = UDim2.new(0, 150, 0.5, -Config.DefaultSizes.FrameHeight / 2)
     self.MainFrame.BackgroundColor3 = Config.Colors.Background
     self.MainFrame.BorderSizePixel = 0
-    self.MainFrame.Active = false
-    self.MainFrame.Draggable = false
-    self.MainFrame.Parent = self.ScreenGui
     createUICorner(self.MainFrame)
 
-    self.TabContainer = Instance.new("Frame")
+    -- Funktionale Elemente aus v1.8
+    self.DragBar = Instance.new("Frame", self.MainFrame)
+    self.DragBar.Name = "DragBar"
+    self.DragBar.Size = UDim2.new(1, 0, 0, Config.DefaultSizes.DragBarHeight)
+    self.DragBar.Position = UDim2.fromScale(0, 0)
+    self.DragBar.BackgroundTransparency = 1
+    self.DragBar.ZIndex = 2
+    
+    -- Angepasste Container-Positionen
+    self.TabContainer = Instance.new("Frame", self.MainFrame)
     self.TabContainer.Name = "TabContainer"
     self.TabContainer.Size = UDim2.new(0, 150, 1, -Config.DefaultSizes.DragBarHeight)
     self.TabContainer.Position = UDim2.new(0, 0, 0, Config.DefaultSizes.DragBarHeight)
     self.TabContainer.BackgroundColor3 = Config.Colors.ButtonBackground
     self.TabContainer.BorderSizePixel = 0
-    self.TabContainer.Parent = self.MainFrame
     createUICorner(self.TabContainer)
-    local tabLayout = Instance.new("UIListLayout")
-    tabLayout.Parent = self.TabContainer
+    local tabLayout = Instance.new("UIListLayout", self.TabContainer)
+    local tabPadding = Instance.new("UIPadding", self.TabContainer)
+    tabPadding.PaddingTop = UDim.new(0, 5); tabPadding.PaddingLeft = UDim.new(0, 5); tabPadding.PaddingRight = UDim.new(0, 5)
 
-    self.ContentContainer = Instance.new("Frame")
+    self.ContentContainer = Instance.new("Frame", self.MainFrame)
     self.ContentContainer.Name = "ContentContainer"
     self.ContentContainer.Size = UDim2.new(1, -150, 1, -Config.DefaultSizes.DragBarHeight)
     self.ContentContainer.Position = UDim2.new(0, 150, 0, Config.DefaultSizes.DragBarHeight)
     self.ContentContainer.BackgroundColor3 = Config.Colors.Background
     self.ContentContainer.BorderSizePixel = 0
-    self.ContentContainer.Parent = self.MainFrame
     createUICorner(self.ContentContainer)
 
-    local closeButton = Instance.new("TextButton")
+    local closeButton = Instance.new("TextButton", self.MainFrame)
     closeButton.Name = "CloseButton"
     closeButton.Size = UDim2.new(0, 30, 0, 30)
-    closeButton.Position = UDim2.new(1, 0, 0, 0)
+    closeButton.Position = UDim2.new(1, -35, 0, 0)
     closeButton.AnchorPoint = Vector2.new(1, 0)
     closeButton.BackgroundTransparency = 1
     closeButton.Font = Enum.Font.SourceSansBold
@@ -85,7 +91,6 @@ function GUI.new(title)
     closeButton.Text = "❌"
     closeButton.TextColor3 = Config.Colors.ButtonText
     closeButton.ZIndex = 3
-    closeButton.Parent = self.MainFrame
     closeButton.MouseButton1Click:Connect(function() self.ScreenGui:Destroy() end)
     
     self.Tabs = {}
@@ -96,14 +101,11 @@ function GUI.new(title)
     self:_setupDynamicScaling()
 
     UserInputService.InputBegan:Connect(function(input, processed)
-        if not processed and input.KeyCode == Enum.KeyCode.F1 then
-            self.MainFrame.Visible = not self.MainFrame.Visible
-        end
+        if not processed and input.KeyCode == Enum.KeyCode.F1 then self.MainFrame.Visible = not self.MainFrame.Visible end
     end)
     local VirtualUser = game:GetService("VirtualUser")
     game:GetService("Players").LocalPlayer.Idled:Connect(function()
-        VirtualUser:CaptureController()
-        VirtualUser:ClickButton2(Vector2.new())
+        VirtualUser:CaptureController(); VirtualUser:ClickButton2(Vector2.new())
     end)
 
     return self
