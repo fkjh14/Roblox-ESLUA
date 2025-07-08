@@ -153,9 +153,9 @@ function GUI:CreateTab(name)
     self.Tabs[name] = {Button = tabButton, Frame = tab.ContentFrame}
     if not self.ActiveTab then pcall(function() tabButton.MouseButton1Click:Fire() end) end
     
+    -- API für Tab-Inhalte (jetzt vollständig)
     local tabApi = {}
     
-    -- KORRIGIERT: Alle Add-Funktionen verwenden jetzt die korrekte, mehrzeilige Syntax.
     function tabApi:AddButton(options)
         local button = Instance.new("TextButton")
         button.Name = options.text or "Button"
@@ -173,7 +173,7 @@ function GUI:CreateTab(name)
 
     function tabApi:AddToggle(options)
         local state = options.default or false
-        local button = self:AddButton({ text = options.text }) -- Ruft die korrigierte AddButton-Funktion auf
+        local button = self:AddButton({ text = options.text })
         local function updateVisuals() button.Text = options.text .. ": " .. (state and "ON" or "OFF") end
         button.MouseButton1Click:Connect(function()
             state = not state
@@ -183,17 +183,136 @@ function GUI:CreateTab(name)
         updateVisuals()
         return button
     end
-    
+
+    -- WIEDER HINZUGEFÜGT
+    function tabApi:AddLabel(text)
+        local label = Instance.new("TextLabel")
+        label.Name = "Label"
+        label.Size = UDim2.new(1, 0, 0, 30)
+        label.BackgroundTransparency = 1
+        label.TextColor3 = Config.Colors.ButtonText
+        label.Font = Enum.Font.SourceSans
+        label.TextSize = 16
+        label.TextWrapped = true
+        label.Text = text
+        label.Parent = tab.ContentFrame
+        return label
+    end
+
+    -- WIEDER HINZUGEFÜGT
+    function tabApi:AddLabeledInput(options)
+        local container = Instance.new("Frame")
+        container.Name = "LabeledInputContainer"
+        container.Size = UDim2.new(1, 0, 0, Config.DefaultSizes.ButtonHeight)
+        container.BackgroundTransparency = 1
+        container.Parent = tab.ContentFrame
+        local label = Instance.new("TextLabel")
+        label.Size = UDim2.new(0.4, -5, 1, 0)
+        label.BackgroundTransparency = 1
+        label.TextColor3 = Config.Colors.ButtonText
+        label.Font = Enum.Font.SourceSans
+        label.TextSize = 16
+        label.Text = options.label
+        label.TextXAlignment = Enum.TextXAlignment.Left
+        label.Parent = container
+        local input = Instance.new("TextBox")
+        input.Size = UDim2.new(0.6, -5, 1, 0)
+        input.Position = UDim2.new(0.4, 5, 0, 0)
+        input.BackgroundColor3 = Config.Colors.ButtonBackground
+        input.TextColor3 = Config.Colors.ButtonText
+        input.Font = Enum.Font.SourceSans
+        input.TextSize = 16
+        input.PlaceholderText = options.placeholder or ""
+        input.Parent = container
+        createUICorner(input)
+        input.FocusLost:Connect(function(enter)
+            if enter and input.Text ~= "" then
+                local value = input.Text
+                if tonumber(value) then value = tonumber(value) end
+                if options.callback then options.callback(value) end
+            end
+        end)
+        return container, input
+    end
+
     function tabApi:AddDivider()
         local divider = Instance.new("Frame")
+        divider.Name = "Divider"
         divider.Size = UDim2.new(1, 0, 0, 2)
         divider.BackgroundColor3 = Config.Colors.Divider
         divider.BorderSizePixel = 0
         divider.Parent = tab.ContentFrame
         return divider
     end
-    
-    -- Hier könnten die anderen Add-Funktionen (AddLabeledInput etc.) ebenso sauber ausformuliert stehen.
+
+    -- WIEDER HINZUGEFÜGT
+    function tabApi:AddChatBypass(options)
+        local container = Instance.new("Frame")
+        container.Name = "ChatBypassContainer"
+        container.Size = UDim2.new(1, 0, 0, Config.DefaultSizes.ButtonHeight)
+        container.BackgroundTransparency = 1
+        container.Parent = tab.ContentFrame
+        local list = Instance.new("UIListLayout")
+        list.FillDirection = Enum.FillDirection.Horizontal
+        list.Padding = UDim.new(0, 5)
+        list.Parent = container
+        local input = Instance.new("TextBox")
+        input.Size = UDim2.new(1, -85, 1, 0)
+        input.BackgroundColor3 = Config.Colors.ButtonBackground
+        input.TextColor3 = Config.Colors.ButtonText
+        input.PlaceholderText = options.placeholder or "..."
+        input.Parent = container
+        createUICorner(input)
+        local sendButton = Instance.new("TextButton")
+        sendButton.Size = UDim2.new(0, 80, 1, 0)
+        sendButton.BackgroundColor3 = Config.Colors.ButtonBackground
+        sendButton.TextColor3 = Config.Colors.ButtonText
+        sendButton.Text = options.buttonText or "Senden"
+        sendButton.Parent = container
+        createUICorner(sendButton)
+        local function sendMessage()
+            if input.Text ~= "" and options.callback then
+                options.callback(input.Text)
+                input.Text = ""
+            end
+        end
+        sendButton.MouseButton1Click:Connect(sendMessage)
+        input.FocusLost:Connect(function(enter) if enter then sendMessage() end end)
+        return container
+    end
+
+    -- WIEDER HINZUGEFÜGT
+    function tabApi:AddEventSpy()
+        local spyApi = {}
+        local container = Instance.new("ScrollingFrame")
+        container.Name = "EventSpyContainer"
+        container.Size = UDim2.new(1, 0, 1, 0)
+        container.BackgroundColor3 = Config.Colors.ButtonBackground
+        container.BorderSizePixel = 1
+        container.BorderColor3 = Config.Colors.Divider
+        container.Parent = tab.ContentFrame
+        createUICorner(container)
+        local listLayout = Instance.new("UIListLayout")
+        listLayout.Padding = UDim.new(0, 2)
+        listLayout.Parent = container
+
+        function spyApi:Log(eventData)
+            local logText = string.format("%s | %s", eventData.direction or "N/A", eventData.name or "Unnamed")
+            local logButton = Instance.new("TextButton")
+            logButton.Name = "LogEntry"
+            logButton.Size = UDim2.new(1, -10, 0, 25)
+            logButton.Text = logText
+            logButton.TextColor3 = Color3.new(1, 1, 1)
+            logButton.BackgroundColor3 = Config.Colors.Background
+            logButton.Font = Enum.Font.SourceSans
+            logButton.TextSize = 14
+            logButton.Parent = container
+            if eventData.callback then
+                logButton.MouseButton1Click:Connect(function() eventData.callback(eventData) end)
+            end
+        end
+        return spyApi
+    end
 
     return tabApi
 end
