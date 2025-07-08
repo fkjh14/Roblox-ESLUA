@@ -1,20 +1,29 @@
 --[[
-    Advanced GUI API v1.0
+    ASSLUA GUI API v1.0
     Eine modulare Bibliothek zur einfachen Erstellung von Benutzeroberflächen.
+	A Simple Script LUA GUI
 ]]
 
--- Verhindert mehrfaches Laden
-if getgenv and getgenv().AdvancedGuiApiLoaded then
-    return getgenv().AdvancedGuiApi
+-- Verhindert mehrfaches Laden des Skripts
+if getgenv and getgenv().ATG_LOADED then
+    error("ASSLUA GUI ist bereits geladen!", 0)
+    return
 end
 
+if getgenv then
+    getgenv().ATG_LOADED = true
+end
+
+-- Dienste cachen
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+local Lighting = game:GetService("Lighting")
 local CoreGui = game:GetService("CoreGui")
-local UserInputService = game:GetService("UserInputService")
 
 local GUI = {}
 GUI.__index = GUI
 
--- Konfiguration (kann bei Bedarf angepasst werden)
+-- Hauptkonfiguration
 local Config = {
     Colors = {
         Background = Color3.fromRGB(30, 30, 30),
@@ -25,16 +34,16 @@ local Config = {
     DefaultSizes = {
         FrameWidth = 600,
         FrameHeight = 400,
-        ButtonHeight = 40,
-        CornerRadius = 8,
-        Padding = 10
+        ButtonWidth = 200,
+        ButtonHeight = 50,
+        CornerRadius = 15
     }
 }
 
--- Hilfsfunktionen
-local function createUICorner(parent)
+-- Hilfsfunktion: Erstelle eine UI-Ecke
+local function createUICorner(parent, cornerRadius)
     local uiCorner = Instance.new("UICorner")
-    uiCorner.CornerRadius = UDim.new(0, Config.DefaultSizes.CornerRadius)
+    uiCorner.CornerRadius = UDim.new(0, cornerRadius)
     uiCorner.Parent = parent
 end
 
@@ -43,30 +52,32 @@ function GUI.new(title)
     local self = setmetatable({}, GUI)
 
     self.ScreenGui = Instance.new("ScreenGui")
-    self.ScreenGui.Name = "AdvancedTabGui"
+    self.ScreenGui.Name = "ASSLUA"
     self.ScreenGui.ResetOnSpawn = false
     self.ScreenGui.Parent = CoreGui
 
     self.MainFrame = Instance.new("Frame")
     self.MainFrame.Name = "MainFrame"
     self.MainFrame.Size = UDim2.new(0, Config.DefaultSizes.FrameWidth, 0, Config.DefaultSizes.FrameHeight)
-    self.MainFrame.Position = UDim2.fromScale(0.5, 0.5)
+    self.MainFrame.Position = UDim2.new(0, 150, 0.5, -Config.DefaultSizes.FrameHeight / 2)
     self.MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
     self.MainFrame.BackgroundColor3 = Config.Colors.Background
-    self.MainFrame.BorderSizePixel = 0
+	self.MainFrame.BorderSizePixel = 0
+	self.MainFrame.Visible = scriptContext.isVisible
     self.MainFrame.Active = true
     self.MainFrame.Draggable = true
     self.MainFrame.Parent = self.ScreenGui
-    createUICorner(self.MainFrame)
+    createUICorner(self.MainFrame, Config.DefaultSizes.CornerRadius)
 
     -- Tab- und Content-Container
     self.TabContainer = Instance.new("Frame")
     self.TabContainer.Name = "TabContainer"
     self.TabContainer.Size = UDim2.new(0, 150, 1, 0)
+	self.TabContainer.Position = UDim2.new(0, 0, 0, 0)
     self.TabContainer.BackgroundColor3 = Config.Colors.ButtonBackground
     self.TabContainer.BorderSizePixel = 0
     self.TabContainer.Parent = self.MainFrame
-    createUICorner(self.TabContainer)
+    createUICorner(self.TabContainer, Config.DefaultSizes.CornerRadius)
     
     local tabLayout = Instance.new("UIListLayout")
     tabLayout.Padding = UDim.new(0, 5)
