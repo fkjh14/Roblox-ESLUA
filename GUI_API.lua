@@ -341,26 +341,35 @@ end
 
 function GUI:_setupDynamicScaling()
     local baseSize = self.MainFrame.AbsoluteSize
+
+    -- Speichere die originalen Größen und Positionen der relevanten Elemente
     for _, element in ipairs(self.MainFrame:GetDescendants()) do
-        if element.Name ~= "CloseButton" and element.Name ~= "ResizeHandle" and element.Name ~= "DragBar" then
-            if element:IsA("GuiObject") then
-                element:SetAttribute("OriginalSize", element.Size)
-                element:SetAttribute("OriginalPosition", element.Position)
-                if element:IsA("TextLabel") or element:IsA("TextButton") or element:IsA("TextBox") then
-                     element:SetAttribute("OriginalTextSize", element.TextSize)
-                end
+        if element:IsA("GuiObject") then
+            element:SetAttribute("OriginalSize", element.Size)
+            element:SetAttribute("OriginalPosition", element.Position)
+            if element:IsA("TextLabel") or element:IsA("TextButton") or element:IsA("TextBox") then
+                 element:SetAttribute("OriginalTextSize", element.TextSize)
             end
         end
     end
+
     self.MainFrame:GetPropertyChangedSignal("Size"):Connect(function()
-        local scaleFactor = self.MainFrame.AbsoluteSize / baseSize
+        local newSize = self.MainFrame.AbsoluteSize
+        local scaleFactor = newSize / baseSize
+
         for _, element in ipairs(self.MainFrame:GetDescendants()) do
-            if element.Name ~= "CloseButton" and element.Name ~= "ResizeHandle" and element.Name ~= "DragBar" then
+            -- KORRIGIERT: Prüft, ob ein Element überhaupt von der Skalierung betroffen sein soll.
+            -- Die Hauptcontainer werden von der Skalierung ausgenommen, da ihr Layout bereits passt.
+            if element.Name ~= "CloseButton" and element.Name ~= "ResizeHandle" and element.Name ~= "DragBar" and element.Name ~= "TabContainer" and element.Name ~= "ContentContainer" then
                 if element:IsA("GuiObject") then
-                    local oSize, oPos, oTextSize = element:GetAttribute("OriginalSize"), element:GetAttribute("OriginalPosition"), element:GetAttribute("OriginalTextSize")
-                    if oSize then element.Size = UDim2.new(oSize.X.Scale, oSize.X.Offset*scaleFactor.X, oSize.Y.Scale, oSize.Y.Offset*scaleFactor.Y) end
-                    if oPos then element.Position = UDim2.new(oPos.X.Scale, oPos.X.Offset*scaleFactor.X, oPos.Y.Scale, oPos.Y.Offset*scaleFactor.Y) end
-                    if oTextSize then element.TextSize = math.clamp(oTextSize*math.min(scaleFactor.X, scaleFactor.Y), 8, 48) end
+                    local oSize = element:GetAttribute("OriginalSize")
+                    local oPos = element:GetAttribute("OriginalPosition")
+                    local oTextSize = element:GetAttribute("OriginalTextSize")
+
+                    -- Wichtig: Die Position wird weiterhin skaliert, damit die Elemente IM ContentContainer mitwandern.
+                    if oSize then element.Size = UDim2.new(oSize.X.Scale, oSize.X.Offset * scaleFactor.X, oSize.Y.Scale, oSize.Y.Offset * scaleFactor.Y) end
+                    if oPos then element.Position = UDim2.new(oPos.X.Scale, oPos.X.Offset * scaleFactor.X, oPos.Y.Scale, oPos.Y.Offset * scaleFactor.Y) end
+                    if oTextSize then element.TextSize = math.clamp(oTextSize * math.min(scaleFactor.X, scaleFactor.Y), 8, 48) end
                 end
             end
         end
