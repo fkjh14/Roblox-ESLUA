@@ -388,15 +388,15 @@ function GUI:_setupDynamicScaling()
 end
 
 function GUI:_createResizeHandle()
-    local resizeHandle = Instance.new("Frame")
+    local resizeHandle = Instance.new("Frame", self.MainFrame)
     resizeHandle.Name = "ResizeHandle"
     resizeHandle.Size = UDim2.new(0, 20, 0, 20)
-    resizeHandle.Position = UDim2.new(1, -20, 1, -20)
+    resizeHandle.Position = UDim2.new(1, 0, 1, 0)
+    resizeHandle.AnchorPoint = Vector2.new(1, 1)
     resizeHandle.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
     resizeHandle.BorderSizePixel = 0
     resizeHandle.ZIndex = 3
     resizeHandle.Active = true
-    resizeHandle.Parent = self.MainFrame
     createUICorner(resizeHandle)
     resizeHandle.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
