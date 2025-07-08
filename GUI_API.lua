@@ -46,8 +46,9 @@ function GUI.new(title)
     self.MainFrame = Instance.new("Frame")
     self.MainFrame.Name = "MainFrame"
     self.MainFrame.Size = UDim2.new(0, Config.DefaultSizes.FrameWidth, 0, Config.DefaultSizes.FrameHeight)
-    self.MainFrame.Position = UDim2.new(0, 150, 0.5, -Config.DefaultSizes.FrameHeight / 2)
-	self.MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+    --- KORRIGIERT: Position und AnchorPoint für eine perfekte Zentrierung
+    self.MainFrame.Position = UDim2.fromScale(0.5, 0.5)
+    self.MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
     self.MainFrame.BackgroundColor3 = Config.Colors.Background
     self.MainFrame.BorderSizePixel = 0
     self.MainFrame.Active = false
@@ -55,11 +56,13 @@ function GUI.new(title)
     self.MainFrame.Parent = self.ScreenGui
     createUICorner(self.MainFrame)
 
+    -- Container
     self.TabContainer = Instance.new("Frame")
     self.TabContainer.Name = "TabContainer"
+    --- KORRIGIERT: Position und Größe relativ zum zentrierten Parent
     self.TabContainer.Size = UDim2.new(0, 150, 1, -Config.DefaultSizes.DragBarHeight)
     self.TabContainer.Position = UDim2.new(0, 0, 0, Config.DefaultSizes.DragBarHeight)
-	self.TabContainer.AnchorPoint = Vector2.new(0.5, 0.5)
+    -- AnchorPoint für Kind-Elemente wird am besten auf (0,0) belassen, um die Positionierung zu vereinfachen
     self.TabContainer.BackgroundColor3 = Config.Colors.ButtonBackground
     self.TabContainer.BorderSizePixel = 0
     self.TabContainer.Parent = self.MainFrame
@@ -69,9 +72,9 @@ function GUI.new(title)
 
     self.ContentContainer = Instance.new("Frame")
     self.ContentContainer.Name = "ContentContainer"
+    --- KORRIGIERT: Position und Größe relativ zum zentrierten Parent
     self.ContentContainer.Size = UDim2.new(1, -150, 1, -Config.DefaultSizes.DragBarHeight)
     self.ContentContainer.Position = UDim2.new(0, 150, 0, Config.DefaultSizes.DragBarHeight)
-	self.ContentContainer.AnchorPoint = Vector2.new(0.5, 0.5)
     self.ContentContainer.BackgroundColor3 = Config.Colors.Background
     self.ContentContainer.BorderSizePixel = 0
     self.ContentContainer.Parent = self.MainFrame
@@ -80,7 +83,8 @@ function GUI.new(title)
     local closeButton = Instance.new("TextButton")
     closeButton.Name = "CloseButton"
     closeButton.Size = UDim2.new(0, 30, 0, 30)
-    closeButton.Position = UDim2.new(1, 0, 0, 0)
+    --- KORRIGIERT: Positionierung, um oben rechts im DragBar-Bereich zu sein
+    closeButton.Position = UDim2.new(1, -5, 0, 0)
     closeButton.AnchorPoint = Vector2.new(1, 0)
     closeButton.BackgroundTransparency = 1
     closeButton.Font = Enum.Font.SourceSansBold
