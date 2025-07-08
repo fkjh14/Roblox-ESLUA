@@ -38,54 +38,70 @@ end
 function GUI.new(title)
     local self = setmetatable({}, GUI)
 
+    -- 1. ScreenGui erstellen (unverändert)
     self.ScreenGui = Instance.new("ScreenGui")
     self.ScreenGui.Name = "ASSLUA_GUI"
     self.ScreenGui.ResetOnSpawn = false
+    self.ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     self.ScreenGui.Parent = CoreGui
 
+    -- 2. Hauptfenster (MainFrame) - SAUBERER AUFBAU
     self.MainFrame = Instance.new("Frame")
     self.MainFrame.Name = "MainFrame"
     self.MainFrame.Size = UDim2.new(0, Config.DefaultSizes.FrameWidth, 0, Config.DefaultSizes.FrameHeight)
-    --- KORRIGIERT: Position und AnchorPoint für eine perfekte Zentrierung
-    self.MainFrame.Position = UDim2.fromScale(0.5, 0.5)
-    self.MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+    self.MainFrame.Position = UDim2.fromScale(0.5, 0.5) -- Zentriert das Fenster
+    self.MainFrame.AnchorPoint = Vector2.new(0.5, 0.5) -- Ankerpunkt in die Mitte für die Zentrierung
     self.MainFrame.BackgroundColor3 = Config.Colors.Background
     self.MainFrame.BorderSizePixel = 0
-    self.MainFrame.Active = false
-    self.MainFrame.Draggable = false
     self.MainFrame.Parent = self.ScreenGui
     createUICorner(self.MainFrame)
 
-    -- Container
+    -- 3. DragBar (obere Leiste zum Verschieben) - SAUBERER AUFBAU
+    local dragBar = Instance.new("Frame")
+    dragBar.Name = "DragBar"
+    dragBar.Size = UDim2.new(1, 0, 0, Config.DefaultSizes.DragBarHeight) -- Volle Breite, feste Höhe
+    dragBar.Position = UDim2.fromScale(0.5, 0) -- Oben in der Mitte des MainFrame
+    dragBar.AnchorPoint = Vector2.new(0.5, 0) -- Anker oben in der Mitte
+    dragBar.BackgroundTransparency = 1
+    dragBar.ZIndex = 2
+    dragBar.Parent = self.MainFrame
+    
+    -- 4. Container für die Tabs (links) - SAUBERER AUFBAU
     self.TabContainer = Instance.new("Frame")
     self.TabContainer.Name = "TabContainer"
-    --- KORRIGIERT: Position und Größe relativ zum zentrierten Parent
-    self.TabContainer.Size = UDim2.new(0, 150, 1, -Config.DefaultSizes.DragBarHeight)
-    self.TabContainer.Position = UDim2.new(0, 0, 0, Config.DefaultSizes.DragBarHeight)
-    -- AnchorPoint für Kind-Elemente wird am besten auf (0,0) belassen, um die Positionierung zu vereinfachen
+    self.TabContainer.Size = UDim2.new(0, 150, 1, -Config.DefaultSizes.DragBarHeight) -- Feste Breite, volle Höhe minus DragBar
+    self.TabContainer.Position = UDim2.fromScale(0, 1) -- Unten links im MainFrame
+    self.TabContainer.AnchorPoint = Vector2.new(0, 1) -- Anker unten links
     self.TabContainer.BackgroundColor3 = Config.Colors.ButtonBackground
     self.TabContainer.BorderSizePixel = 0
     self.TabContainer.Parent = self.MainFrame
     createUICorner(self.TabContainer)
     local tabLayout = Instance.new("UIListLayout")
     tabLayout.Parent = self.TabContainer
+    tabLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+    local tabPadding = Instance.new("UIPadding")
+    tabPadding.PaddingTop = UDim.new(0, 5)
+    tabPadding.PaddingLeft = UDim.new(0, 5)
+    tabPadding.PaddingRight = UDim.new(0, 5)
+    tabPadding.Parent = self.TabContainer
 
+    -- 5. Container für den Inhalt (rechts) - SAUBERER AUFBAU
     self.ContentContainer = Instance.new("Frame")
     self.ContentContainer.Name = "ContentContainer"
-    --- KORRIGIERT: Position und Größe relativ zum zentrierten Parent
-    self.ContentContainer.Size = UDim2.new(1, -150, 1, -Config.DefaultSizes.DragBarHeight)
-    self.ContentContainer.Position = UDim2.new(0, 150, 0, Config.DefaultSizes.DragBarHeight)
+    self.ContentContainer.Size = UDim2.new(1, -150, 1, -Config.DefaultSizes.DragBarHeight) -- Volle Breite minus Tabs, volle Höhe minus DragBar
+    self.ContentContainer.Position = UDim2.fromScale(1, 1) -- Unten rechts im MainFrame
+    self.ContentContainer.AnchorPoint = Vector2.new(1, 1) -- Anker unten rechts
     self.ContentContainer.BackgroundColor3 = Config.Colors.Background
     self.ContentContainer.BorderSizePixel = 0
     self.ContentContainer.Parent = self.MainFrame
     createUICorner(self.ContentContainer)
 
+    -- 6. UI-Steuerelemente (Close-Button etc.)
     local closeButton = Instance.new("TextButton")
     closeButton.Name = "CloseButton"
-    closeButton.Size = UDim2.new(0, 30, 0, 30)
-    --- KORRIGIERT: Positionierung, um oben rechts im DragBar-Bereich zu sein
-    closeButton.Position = UDim2.new(1, -5, 0, 0)
-    closeButton.AnchorPoint = Vector2.new(1, 0)
+    closeButton.Size = UDim2.new(0, Config.DefaultSizes.DragBarHeight, 0, Config.DefaultSizes.DragBarHeight) -- Quadratisch
+    closeButton.Position = UDim2.fromScale(1, 0) -- Oben rechts
+    closeButton.AnchorPoint = Vector2.new(1, 0) -- Anker oben rechts
     closeButton.BackgroundTransparency = 1
     closeButton.Font = Enum.Font.SourceSansBold
     closeButton.TextSize = 18
@@ -95,13 +111,16 @@ function GUI.new(title)
     closeButton.Parent = self.MainFrame
     closeButton.MouseButton1Click:Connect(function() self.ScreenGui:Destroy() end)
     
+    -- Initialisierung
     self.Tabs = {}
     self.ActiveTab = nil
 
-    self:_createDragBar()
+    -- Diese Funktionen bleiben gleich, da sie auf den korrekten Aufbau angewiesen sind
+    self:_createDragBar(dragBar) -- Übergib die dragBar an die Funktion
     self:_createResizeHandle()
     self:_setupDynamicScaling()
 
+    -- Globale Events
     UserInputService.InputBegan:Connect(function(input, processed)
         if not processed and input.KeyCode == Enum.KeyCode.F1 then
             self.MainFrame.Visible = not self.MainFrame.Visible
@@ -324,20 +343,23 @@ function GUI:CreateTab(name)
     return tabApi
 end
 
-function GUI:_createDragBar()
-    local dragBar = Instance.new("Frame")
-    dragBar.Name = "DragBar"
-    dragBar.Size = UDim2.new(1, 0, 0, Config.DefaultSizes.DragBarHeight)
-    dragBar.BackgroundTransparency = 1
-    dragBar.ZIndex = 2
-    dragBar.Parent = self.MainFrame
+-- Passe diese Funktion ebenfalls an:
+function GUI:_createDragBar(dragBar)
+    -- dragBar wird nicht mehr hier erstellt, sondern nur noch die Logik verbunden
     local dragging, dragStart, frameStart
+    
     dragBar.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging, dragStart, frameStart = true, input.Position, self.MainFrame.Position
-            input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then dragging = false end end)
+            
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
         end
     end)
+    
     UserInputService.InputChanged:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseMovement and dragging then
             local delta = input.Position - dragStart
