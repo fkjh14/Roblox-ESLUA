@@ -342,61 +342,23 @@ function GUI:_createDragBar()
 end
 
 function GUI:_setupDynamicScaling()
-    local baseSize = self.MainFrame.AbsoluteSize
-
-    -- Speichere die originalen Werte (unverändert)
-    for _, element in ipairs(self.MainFrame:GetDescendants()) do
-        if element:IsA("GuiObject") then
-            -- Wir fügen die Container zur Ignorier-Liste hinzu,
-            -- damit sie von der Skalierung unberührt bleiben
-            if element.Name ~= "CloseButton" and element.Name ~= "ResizeHandle" and element.Name ~= "DragBar" then
-                element:SetAttribute("OriginalSize", element.Size)
-                element:SetAttribute("OriginalPosition", element.Position)
-                if element:IsA("TextLabel") or element:IsA("TextButton") or element:IsA("TextBox") then
-                     element:SetAttribute("OriginalTextSize", element.TextSize)
-                end
-            end
-        end
-    end
-
     self.MainFrame:GetPropertyChangedSignal("Size"):Connect(function()
-        local newSize = self.MainFrame.AbsoluteSize
-        local scaleFactor = newSize / baseSize
-
-        for _, element in ipairs(self.MainFrame:GetDescendants()) do
-            if element:IsA("GuiObject") then
-                local oSize = element:GetAttribute("OriginalSize")
-                local oPos = element:GetAttribute("OriginalPosition")
-                local oTextSize = element:GetAttribute("OriginalTextSize")
-
-                if oSize then
-                    element.Size = UDim2.new(oSize.X.Scale, oSize.X.Offset * scaleFactor.X, oSize.Y.Scale, oSize.Y.Offset * scaleFactor.Y)
-                end
-                
-                -- KORRIGIERT: Wir skalieren die Position nur für Elemente,
-                -- die nicht die Hauptcontainer sind.
-                if oPos and element.Name ~= "TabContainer" and element.Name ~= "ContentContainer" then
-                    element.Position = UDim2.new(oPos.X.Scale, oPos.X.Offset * scaleFactor.X, oPos.Y.Scale, oPos.Y.Offset * scaleFactor.Y)
-                end
-
-                if oTextSize then
-                    element.TextSize = math.clamp(oTextSize * math.min(scaleFactor.X, scaleFactor.Y), 8, 48)
-                end
-            end
-        end
+        local dragBarHeight = self.DragBar.AbsoluteSize.Y
+        self.TabContainer.Size = UDim2.new(0, 150, 1, -dragBarHeight)
+        self.ContentContainer.Size = UDim2.new(1, -150, 1, -dragBarHeight)
     end)
 end
 
 function GUI:_createResizeHandle()
-    local resizeHandle = Instance.new("Frame", self.MainFrame)
+    local resizeHandle = Instance.new("Frame")
     resizeHandle.Name = "ResizeHandle"
     resizeHandle.Size = UDim2.new(0, 20, 0, 20)
-    resizeHandle.Position = UDim2.new(1, 0, 1, 0)
-    resizeHandle.AnchorPoint = Vector2.new(1, 1)
+    resizeHandle.Position = UDim2.new(1, -20, 1, -20)
     resizeHandle.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
     resizeHandle.BorderSizePixel = 0
     resizeHandle.ZIndex = 3
     resizeHandle.Active = true
+    resizeHandle.Parent = self.MainFrame
     createUICorner(resizeHandle)
     resizeHandle.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
