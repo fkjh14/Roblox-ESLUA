@@ -46,7 +46,7 @@ function GUI.new(title)
     self.MainFrame = Instance.new("Frame")
     self.MainFrame.Name = "MainFrame"
     self.MainFrame.Size = UDim2.new(0, Config.DefaultSizes.FrameWidth, 0, Config.DefaultSizes.FrameHeight)
-    self.MainFrame.Position = UDim2.new(0, 150, 0.5, -Config.DefaultSizes.FrameHeight / 2)
+    self.MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0) -- Position an den Mittelpunkt des Bildschirms anpassen
     self.MainFrame.BackgroundColor3 = Config.Colors.Background
     self.MainFrame.BorderSizePixel = 0
     self.MainFrame.Active = false
