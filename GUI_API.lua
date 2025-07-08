@@ -83,7 +83,7 @@ function GUI.new(title)
     local closeButton = Instance.new("TextButton", self.MainFrame)
     closeButton.Name = "CloseButton"
     closeButton.Size = UDim2.new(0, 30, 0, 30)
-    closeButton.Position = UDim2.new(1, -35, 0, 0)
+    closeButton.Position = UDim2.new(1, 0, 0, 0)
     closeButton.AnchorPoint = Vector2.new(1, 0)
     closeButton.BackgroundTransparency = 1
     closeButton.Font = Enum.Font.SourceSansBold
