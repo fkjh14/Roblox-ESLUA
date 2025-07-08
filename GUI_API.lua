@@ -246,9 +246,42 @@ function GUI:_setupDynamicScaling()
 end
 
 function GUI:_createResizeHandle()
-    -- Diese Funktion bleibt unverändert zur letzten Version
-    local resizeHandle=Instance.new("Frame",{Name="ResizeHandle",Size=UDim2.new(0,20,0,20),Position=UDim2.new(1,-20,1,-20),BackgroundColor3=Color3.fromRGB(100,100,100),BorderSizePixel=0,ZIndex=3,Active=true,Parent=self.MainFrame});createUICorner(resizeHandle)
-    resizeHandle.InputBegan:Connect(function(input) if input.UserInputType==Enum.UserInputType.MouseButton1 then local startPos=UserInputService:GetMouseLocation();local startSize=self.MainFrame.AbsoluteSize;local moveConn,releaseConn;moveConn=UserInputService.InputChanged:Connect(function(moveInput)if moveInput.UserInputType==Enum.UserInputType.MouseMovement then local currentPos=UserInputService:GetMouseLocation();local delta=currentPos-startPos;self.MainFrame.Size=UDim2.new(0,math.max(350,startSize.X+delta.X),0,math.max(250,startSize.Y+delta.Y))end end);releaseConn=UserInputService.InputEnded:Connect(function(endInput)if endInput.UserInputType==Enum.UserInputType.MouseButton1 then moveConn:Disconnect();releaseConn:Disconnect()end end)end end)
+    -- KORRIGIERT: Instanz wird korrekt in mehreren Schritten erstellt
+    local resizeHandle = Instance.new("Frame")
+    resizeHandle.Name = "ResizeHandle"
+    resizeHandle.Size = UDim2.new(0, 20, 0, 20)
+    resizeHandle.Position = UDim2.new(1, -20, 1, -20)
+    resizeHandle.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+    resizeHandle.BorderSizePixel = 0
+    resizeHandle.ZIndex = 3
+    resizeHandle.Active = true
+    resizeHandle.Parent = self.MainFrame -- Parent wird zuletzt zugewiesen
+
+    createUICorner(resizeHandle)
+
+    resizeHandle.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            -- Die Logik zum Ändern der Größe bleibt gleich
+            local startPos = UserInputService:GetMouseLocation()
+            local startSize = self.MainFrame.AbsoluteSize
+            local moveConn, releaseConn
+
+            moveConn = UserInputService.InputChanged:Connect(function(moveInput)
+                if moveInput.UserInputType == Enum.UserInputType.MouseMovement then
+                    local currentPos = UserInputService:GetMouseLocation()
+                    local delta = currentPos - startPos
+                    self.MainFrame.Size = UDim2.new(0, math.max(350, startSize.X + delta.X), 0, math.max(250, startSize.Y + delta.Y))
+                end
+            end)
+
+            releaseConn = UserInputService.InputEnded:Connect(function(endInput)
+                if endInput.UserInputType == Enum.UserInputType.MouseButton1 then
+                    moveConn:Disconnect()
+                    releaseConn:Disconnect()
+                end
+            end)
+        end
+    end)
 end
 
 return GUI
