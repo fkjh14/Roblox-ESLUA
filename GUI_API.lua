@@ -320,12 +320,7 @@ function GUI:CreateTab(name)
 end
 
 function GUI:_createDragBar()
-    local dragBar = Instance.new("Frame")
-    dragBar.Name = "DragBar"
-    dragBar.Size = UDim2.new(1, 0, 0, Config.DefaultSizes.DragBarHeight)
-    dragBar.BackgroundTransparency = 1
-    dragBar.ZIndex = 2
-    dragBar.Parent = self.MainFrame
+    local dragBar = self.DragBar
     local dragging, dragStart, frameStart
     dragBar.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
